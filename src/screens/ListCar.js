@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
     StyleSheet,
     View,
@@ -6,62 +6,18 @@ import {
     Linking,
     ScrollView,
     TouchableHighlight,
-    Image
-} from 'react-native'
-import Feather from 'react-native-vector-icons/Feather'
+    Image,
+} from 'react-native';
+import Feather from 'react-native-vector-icons/Feather';
 import {Constants, colors} from '../configs/theme';
-import { Modalize } from 'react-native-modalize';
+import {Modalize} from 'react-native-modalize';
 import CarDetail from '../components/CardDetail';
+import {getData} from '../configs/googlesheet';
 
 const ListCar = () => {
-    const modalRef = React.useRef(null)
-    const [isVisible, setVisible] = React.useState(false)
-    const [data] = React.useState([
-        {
-            carOwner: 'Long Hải',
-            phone: '0901321325',
-            address: 'Nga bach, Nga Son',
-            timeStart: '11h:30',
-            timeEnd: '6h',
-            image: 'https://static.vexere.com/c/i/16211/xe-tien-tien-VeXeRe-jOA57FL-1000x600.jpeg',
-            category: 'Xe Khách'
-        },
-        {
-            carOwner: 'Dậu',
-            phone: '0901321325',
-            address: 'Nga Thach, Nga Son',
-            timeStart: '11h:30',
-            timeEnd: '6h',
-            image: 'https://limousinevn.vn/wp-content/uploads/2018/01/phuong-nguyen-limousine.jpg',
-            category: 'Xe Dù'
-        },
-        {
-            carOwner: 'Nham',
-            phone: '0901321325',
-            address: 'Thi Tran, Nga Son',
-            timeStart: '6h',
-            timeEnd: '13h:30',
-            image: 'http://xedulich.danang.vn/public/thue-xe-du-lich-24-cho-da-nang/dich-vu-thue-xe-du-lich-24-cho-gia-re-tai-da-nang.jpg',
-            category: 'Xe Taxi'
-        },
-        {
-            carOwner: 'Tien Tien',
-            phone: '0901321325',
-            address: 'Nga Yen, Nga Son',
-            timeStart: '6h',
-            timeEnd: '13h:30',
-            image: 'https://static.vexere.com/c/i/16211/xe-tien-tien-VeXeRe-jOA57FL-1000x600.jpeg'
-        },
-        {
-            carOwner: 'Tien Tien',
-            phone: '0901321325',
-            address: 'Nga Yen, Nga Son',
-            timeStart: 1576750888721,
-            timeEnd: 1576750888721,
-            image: 'https://static.vexere.com/c/i/16211/xe-tien-tien-VeXeRe-jOA57FL-1000x600.jpeg',
-            category: 'Xe Khach'
-        }
-    ])
+    const modalRef = React.useRef(null);
+    const [isVisible, setVisible] = React.useState(false);
+    const [data, setData] = React.useState([]);
 
     // const renderItem = ({item, index}) => {
     //     return (
@@ -96,8 +52,8 @@ const ListCar = () => {
     //     )
     // }
     const callPhone = (phone) => {
-        Linking.openURL(`tel:${phone}`)
-    }
+        Linking.openURL(`tel:${phone}`);
+    };
     const onOpen = () => {
         const modal = modalRef.current;
 
@@ -105,12 +61,18 @@ const ListCar = () => {
             modal.open();
         }
     };
-    const close = ()=>{
+    const close = () => {
         const modal = modalRef.current;
         if (modal) {
             modal.close();
         }
-    }
+    };
+    useEffect(() => {
+        getData().then(resData => {
+            setData(resData);
+        });
+
+    }, []);
     return (
         <View style={styles.container}>
             <View style={styles.backgroundList}>
@@ -121,66 +83,79 @@ const ListCar = () => {
                             <Text>Tat ca</Text>
                         </View>
                         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                            <View style={styles.card}>
-                                <View style={styles.cardImage}>
-                                    <TouchableHighlight style={{width: '100%', height: '100%'}}
-                                                        onPress={onOpen}>
-                                        <Image
-                                            style={styles.image}
-                                            source={{uri: 'https://static.vexere.com/c/i/16211/xe-tien-tien-VeXeRe-jOA57FL-1000x600.jpeg'}}
-                                        />
-                                    </TouchableHighlight>
-                                </View>
-                                <View style={[styles.infoCar, {flex: 1}]}>
-                                    <View style={styles.cardHeader}>
-                                        <View style={styles.cardTitle}>
-                                            <Text style={{fontWeight: 'bold'}}>Long Hải</Text>
-                                            <Text style={{fontSize: 11}}>100.000d</Text>
+                            {data.map((car, index) => {
+                                return (
+                                    <View style={styles.card} key={index}>
+                                        <View style={styles.cardImage}>
+                                            <TouchableHighlight style={{width: '100%', height: '100%'}}
+                                                                onPress={onOpen}>
+                                                <Image
+                                                    style={styles.image}
+                                                    source={{uri: car.image}}
+                                                />
+                                            </TouchableHighlight>
                                         </View>
-                                        <Text style={styles.cardSubTitle}>Nga Sơn, Thanh Hóa</Text>
-                                    </View>
-                                    <View style={{flex: 3.5, fontSize: 10}}>
-                                        <View style={{
-                                            marginTop: 5,
-                                            marginBottom: 5,
-                                            flexDirection: 'row',
-                                            justifyContent: 'space-between'
-                                        }}>
-                                            <Text style={{fontSize: 13}}>Nga Sơn</Text>
-                                            <Text style={{fontSize: 13}}>Ha Nội</Text>
-                                        </View>
-                                        <View style={{flexDirection: 'row', justifyContent: 'space-between', margin: 5}}>
-                                            <View>
-                                                <Text style={{fontSize: 11}}>11h:30</Text>
+                                        <View style={[styles.infoCar, {flex: 1}]}>
+                                            <View style={styles.cardHeader}>
+                                                <View style={styles.cardTitle}>
+                                                    <Text style={{fontWeight: 'bold'}}>{car.carOwner}</Text>
+                                                    <Text style={{fontSize: 11}}>{car.price}</Text>
+                                                </View>
+                                                <Text style={styles.cardSubTitle}>{car.address}</Text>
                                             </View>
-                                            <View>
-                                                <Text style={{fontSize: 11}}>{'------->'} </Text>
-                                            </View>
-                                            <View>
-                                                <Text style={{fontSize: 11}}>14h:30</Text>
-                                            </View>
-                                        </View>
-                                        <View style={{flexDirection: 'row', justifyContent: 'space-between', margin: 5}}>
-                                            <View>
-                                                <Text style={{fontSize: 11}}>9h</Text>
-                                            </View>
-                                            <View>
-                                                <Text style={{fontSize: 11}}>{'<-------'}</Text>
-                                            </View>
-                                            <View>
-                                                <Text style={{fontSize: 11}}>6h</Text>
-                                            </View>
-                                        </View>
+                                            <View style={{flex: 3.5, fontSize: 10}}>
+                                                <View style={{
+                                                    marginTop: 5,
+                                                    marginBottom: 5,
+                                                    flexDirection: 'row',
+                                                    justifyContent: 'space-between',
+                                                }}>
+                                                    <Text style={{fontSize: 13}}>Nga Sơn</Text>
+                                                    <Text style={{fontSize: 13}}>Ha Nội</Text>
+                                                </View>
+                                                <View style={{
+                                                    flexDirection: 'row',
+                                                    justifyContent: 'space-between',
+                                                    margin: 5,
+                                                }}>
+                                                    <View>
+                                                        <Text style={{fontSize: 11}}>{car.timeStart}</Text>
+                                                    </View>
+                                                    <View>
+                                                        <Text style={{fontSize: 11}}>{'------->'} </Text>
+                                                    </View>
+                                                    <View>
+                                                        <Text style={{fontSize: 11}}>{car.timeEnd}</Text>
+                                                    </View>
+                                                </View>
+                                                <View style={{
+                                                    flexDirection: 'row',
+                                                    justifyContent: 'space-between',
+                                                    margin: 5,
+                                                }}>
+                                                    <View>
+                                                        <Text style={{fontSize: 11}}>9h</Text>
+                                                    </View>
+                                                    <View>
+                                                        <Text style={{fontSize: 11}}>{'<-------'}</Text>
+                                                    </View>
+                                                    <View>
+                                                        <Text style={{fontSize: 11}}>6h</Text>
+                                                    </View>
+                                                </View>
 
 
+                                            </View>
+                                            <View style={styles.phone}>
+                                                <Feather name="phone-call" size={12} color="black"/>
+                                                <Text style={{fontSize: 12}}
+                                                      onPress={() => callPhone('0' + car.phoneNumber)}> {'0' + car.phoneNumber}</Text>
+                                            </View>
+                                        </View>
                                     </View>
-                                    <View style={styles.phone}>
-                                        <Feather name="phone-call" size={12} color="black"/>
-                                        <Text style={{fontSize: 12}}
-                                              onPress={() => callPhone('0901764393')}> 0901764393</Text>
-                                    </View>
-                                </View>
-                            </View>
+                                );
+                            })}
+
                             <View style={styles.card}>
                             </View>
                             <View style={styles.card}>
@@ -216,7 +191,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: colors.home,
-        elevation: 0
+        elevation: 0,
     },
     card: {
         height: 150,
@@ -224,7 +199,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.white,
         borderRadius: Constants.borderRadius,
         flexDirection: 'row',
-        marginRight: 16
+        marginRight: 16,
     },
     cardHeader: {
         flex: 1.5,
@@ -238,7 +213,7 @@ const styles = StyleSheet.create({
     },
     cardSubTitle: {
         fontSize: 11,
-        color: colors.text_gray
+        color: colors.text_gray,
     },
     cardImage: {
         width: '40%',
@@ -250,18 +225,18 @@ const styles = StyleSheet.create({
         width: '90%',
         height: '90%',
         resizeMode: 'stretch',
-        borderRadius: 15
+        borderRadius: 15,
     },
     infoCar: {
         width: '60%',
         height: '100%',
-        padding: 5
+        padding: 5,
     },
     phone: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'flex-end',
-        justifyContent: 'flex-end'
+        justifyContent: 'flex-end',
     },
     backgroundList: {
         width: '100%',
@@ -270,10 +245,10 @@ const styles = StyleSheet.create({
         borderTopStartRadius: Constants.borderRadius,
         borderTopEndRadius: Constants.borderRadius,
         padding: Constants.pad,
-        paddingTop: 0
+        paddingTop: 0,
     },
     categories: {
-        marginBottom: 35
+        marginBottom: 35,
     },
     modal: {
         backgroundColor: '#cac9dd',
@@ -284,6 +259,6 @@ const styles = StyleSheet.create({
 
     handle: {
         width: 150,
-        backgroundColor: '#b0afbc'
+        backgroundColor: '#b0afbc',
     },
 });
