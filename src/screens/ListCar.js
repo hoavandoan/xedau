@@ -6,6 +6,8 @@ import {
     Linking,
     ScrollView,
     TouchableHighlight,
+    TouchableWithoutFeedback,
+    TouchableNativeFeedback,
     Image,
 } from 'react-native';
 import Feather from 'react-native-vector-icons/Feather';
@@ -16,48 +18,17 @@ import {getData} from '../configs/googlesheet';
 
 const ListCar = () => {
     const modalRef = React.useRef(null);
-    const [isVisible, setVisible] = React.useState(false);
     const [data, setData] = React.useState([]);
+    const [dataModal, setDataModal] = React.useState({})
 
-    // const renderItem = ({item, index}) => {
-    //     return (
-    //         <View key={index}>
-    //             <View style={styles.card}>
-    //                 <View style={styles.cardImage}>
-    //                     <Image
-    //                         style={styles.image}
-    //                         source={{uri: item.image}}
-    //                     />
-    //                 </View>
-    //                 <View style={[styles.infoCar, {flex: 1}]}>
-    //                     <View style={styles.cardHeader}>
-    //                         <View style={styles.cardTitle}>
-    //                             <Text>{item.carOwner}</Text>
-    //                             <Text>{item.category}</Text>
-    //                         </View>
-    //                         <Text style={styles.cardSubTitle}>{item.address}</Text>
-    //                     </View>
-    //                     <View style={{flex: 3, marginLeft: 15, backgroundColor: grey50}}>
-    //                         <Text>Nga Son di: {item.timeStart}</Text>
-    //                         <Text>Ha Noi ve: {item.timeEnd}</Text>
-    //                     </View>
-    //                     <View style={styles.phone}>
-    //                         <Feather name="phone-call" size={16} color="black"/>
-    //                         <Text onPress={() => callPhone(item.phone)}> {item.phone}</Text>
-    //                     </View>
-    //                 </View>
-    //             </View>
-    //
-    //         </View>
-    //     )
-    // }
     const callPhone = (phone) => {
         Linking.openURL(`tel:${phone}`);
     };
-    const onOpen = () => {
+    const onOpen = (car) => {
         const modal = modalRef.current;
 
         if (modal) {
+            setDataModal(car)
             modal.open();
         }
     };
@@ -80,25 +51,30 @@ const ListCar = () => {
                     <View style={styles.categories}>
                         <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
                             <Text style={{fontWeight: 'bold', marginBottom: 12}}>Xe Khách</Text>
-                            <Text>Tat ca</Text>
+                            <Text>Xem tất cả</Text>
                         </View>
                         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
                             {data.map((car, index) => {
                                 return (
                                     <View style={styles.card} key={index}>
                                         <View style={styles.cardImage}>
-                                            <TouchableHighlight style={{width: '100%', height: '100%'}}
-                                                                onPress={onOpen}>
+                                            <TouchableNativeFeedback
+                                                style={{width: '100%', height: '100%',elevation: 10}}
+                                                background={TouchableNativeFeedback.Ripple('red', false)}
+                                                onPress={() => onOpen(car)}
+                                            >
                                                 <Image
                                                     style={styles.image}
                                                     source={{uri: car.image}}
                                                 />
-                                            </TouchableHighlight>
+                                            </TouchableNativeFeedback>
                                         </View>
                                         <View style={[styles.infoCar, {flex: 1}]}>
                                             <View style={styles.cardHeader}>
                                                 <View style={styles.cardTitle}>
-                                                    <Text style={{fontWeight: 'bold'}}>{car.carOwner}</Text>
+                                                    <TouchableHighlight onPress={() => onOpen(car)}>
+                                                        <Text style={{fontWeight: 'bold'}}>{car.carOwner}</Text>
+                                                    </TouchableHighlight>
                                                     <Text style={{fontSize: 11}}>{car.price}</Text>
                                                 </View>
                                                 <Text style={styles.cardSubTitle}>{car.address}</Text>
@@ -110,8 +86,8 @@ const ListCar = () => {
                                                     flexDirection: 'row',
                                                     justifyContent: 'space-between',
                                                 }}>
-                                                    <Text style={{fontSize: 13}}>Nga Sơn</Text>
-                                                    <Text style={{fontSize: 13}}>Ha Nội</Text>
+                                                    <Text style={{fontSize: 13}}>{car.from}</Text>
+                                                    <Text style={{fontSize: 13}}>{car.to}</Text>
                                                 </View>
                                                 <View style={{
                                                     flexDirection: 'row',
@@ -134,13 +110,13 @@ const ListCar = () => {
                                                     margin: 5,
                                                 }}>
                                                     <View>
-                                                        <Text style={{fontSize: 11}}>9h</Text>
+                                                        <Text style={{fontSize: 11}}>{car.timeGoBackEnd}</Text>
                                                     </View>
                                                     <View>
                                                         <Text style={{fontSize: 11}}>{'<-------'}</Text>
                                                     </View>
                                                     <View>
-                                                        <Text style={{fontSize: 11}}>6h</Text>
+                                                        <Text style={{fontSize: 11}}>{car.timeGoBackStart}</Text>
                                                     </View>
                                                 </View>
 
@@ -155,11 +131,6 @@ const ListCar = () => {
                                     </View>
                                 );
                             })}
-
-                            <View style={styles.card}>
-                            </View>
-                            <View style={styles.card}>
-                            </View>
                         </ScrollView>
                     </View>
                 </ScrollView>
@@ -180,7 +151,7 @@ const ListCar = () => {
                 //     spring: { speed: 100, bounciness: 10 },
                 // }}
             >
-                <CarDetail closeModal={close} data={data}/>
+                <CarDetail closeModal={close} data={dataModal}/>
             </Modalize>
         </View>
     );
@@ -220,12 +191,14 @@ const styles = StyleSheet.create({
         height: '100%',
         justifyContent: 'center',
         alignItems: 'center',
+        flexDirection: 'row',
     },
     image: {
-        width: '90%',
-        height: '90%',
-        resizeMode: 'stretch',
+        width: '100%',
+        height: '100%',
         borderRadius: 15,
+        borderTopRightRadius: 0,
+        borderBottomRightRadius: 0,
     },
     infoCar: {
         width: '60%',
