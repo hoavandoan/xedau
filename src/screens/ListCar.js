@@ -180,7 +180,7 @@ const ListCar = () => {
                 //     spring: { speed: 100, bounciness: 10 },
                 // }}
             >
-                <CarDetail closeModal={close}/>
+                <CarDetail closeModal={close} data={data}/>
             </Modalize>
         </View>
     );
